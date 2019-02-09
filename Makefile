@@ -12,9 +12,14 @@ node_modules: package.json
 places.json:
 	curl https://data.perio.do/graphs/places.json > $@
 
+tiles:
+	dat clone \
+	dat://db9c54fd4775da34109c9afd366cac5d3dff26c6a3902fc9c9c454193b543cbb \
+	$@
+
 ####
 
-develop: node_modules places.json
+develop: node_modules places.json tiles
 	$(NPM_BIN)/budo develop.js --live --open
 
 clean:

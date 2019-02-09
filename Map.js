@@ -4,6 +4,7 @@ const regl = require('regl')             // functional webgl api
 const resl = require('resl')             // streaming resource loader
 //const glsl = require('glslify')        // modules for opengl shading language
 const mixmap = require('mixmap')         // webgl mapping library
+const zoomTo = require('mixmap-zoom')
 const createMesh = require('earth-mesh') // geojson -> webgl triangles
 
 // oes_element_index_uint adds support for unsigned ints
@@ -100,7 +101,7 @@ const drawTile = map.createDraw({
 })
 
 // three levels of tiles from Natural Earth II with shaded relief and water
-const tileManifest = require('./tiles/manifest.json')
+const tileManifest = require('./tiles/tiles.json')
 const tiles = [ {}, {}, {} ]
 tileManifest.forEach((file, id) => {
   const level = Number(file.split('/')[0])
@@ -156,7 +157,7 @@ map.addLayer({
 const drawTriangle = map.createDraw({
   frag: `
     void main () {
-      gl_FragColor = vec4(1.0,0.0,1.0,0.4);
+      gl_FragColor = vec4(0.976,0.800,0.388,0.3);
     }
   `,
   uniforms: {
@@ -176,6 +177,15 @@ const display = geometry => {
   const mesh = createMesh(geometry)
   drawTriangle.props = [mesh.triangle]
   map.draw()
+
+  const bbox = [180,90,-180,-90]
+  for (var i = 0; i < mesh.triangle.positions.length; i++) {
+    bbox[0] = Math.min(bbox[0], mesh.triangle.positions[i][0])
+    bbox[1] = Math.min(bbox[1], mesh.triangle.positions[i][1])
+    bbox[2] = Math.max(bbox[2], mesh.triangle.positions[i][0])
+    bbox[3] = Math.max(bbox[3], mesh.triangle.positions[i][1])
+  }
+  zoomTo(map, {viewbox: bbox, duration: 500, padding: 1})
 }
 
 const React = require('react')
@@ -193,7 +203,7 @@ const Map = function(props) {
   let ref = React.createRef()
   React.useEffect(() => {
     for (let feature of (props.features || [])) {
-      if (feature) display(feature)
+      if (feature && feature.geometry) display(feature)
     }
     while (ref.current.firstChild) {
       ref.current.removeChild(ref.current.firstChild)

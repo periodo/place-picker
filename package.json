@@ -26,6 +26,7 @@
     "glsl-hsl2rgb": "^1.1.0",
     "glslify": "^7.0.0",
     "mixmap": "^1.5.1",
+    "mixmap-zoom": "^1.0.0",
     "react-autosuggest": "^9.4.3",
     "react-hyperscript": "^3.2.0",
     "react-redux": "^6.0.0",
