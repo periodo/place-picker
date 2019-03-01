@@ -50,7 +50,7 @@ const display = geometry => {
     bbox[2] = Math.max(bbox[2], mesh.triangle.positions[i][0])
     bbox[3] = Math.max(bbox[3], mesh.triangle.positions[i][1])
   }
-  zoomTo(map, {viewbox: bbox, duration: 500, padding: 1})
+  zoomTo(map, {viewbox: bbox, duration: 500, padding: 2})
 }
 
 const React = require('react')
@@ -81,6 +81,6 @@ const Map = function(props) {
 module.exports = function({features}) {
   return [
     h(Mix, {key: 1}),
-    h(Map, {key: 2, width: 600, height: 400, features})
+    h(Map, {key: 2, width: 400, height: 200, features})
   ]
 }
