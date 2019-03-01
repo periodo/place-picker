@@ -20,18 +20,28 @@ const app = (state = {}, action) => {
 
 const FeaturePicker = connect(
   null,
-  dispatch => ({onFeaturePicked: id => dispatch(featurePicked(id))})
+  dispatch => ({onFeaturePicked: feature => dispatch(featurePicked(feature))})
 )(require('./index'))
 
 const Map = connect(
   state => ({features: [state.feature]}),
 )(require('./Map'))
 
+const Label = connect(
+  state => ({feature: state.feature})
+)(require('./Label'))
+
+const store = createStore(
+  app,
+  window.__REDUX_DEVTOOLS_EXTENSION__ && window.__REDUX_DEVTOOLS_EXTENSION__()
+)
+
 render(
-  h(Provider, {store: createStore(app)},
+  h(Provider, {store},
     [
       h(Map, {key: 1}),
-      h(FeaturePicker, {key: 2, gazetteers}),
+      h(Label, {key: 2}),
+      h(FeaturePicker, {key: 3, gazetteers}),
     ]
   ),
   document.body.appendChild(document.createElement('div'))

@@ -16,7 +16,23 @@ const getSuggestions = (gazetteers, value) => {
   }
 
   const regex = new RegExp('^' + escapedValue, 'i')
-  const matches = feature => regex.test(feature.properties.title)
+  const matches = feature => {
+    if (! (feature && feature.properties)) {
+      return false
+    }
+    if (regex.test(feature.properties.title)) {
+      return true
+    }
+    if (! feature.names) {
+      return false
+    }
+    for (let name of feature.names) {
+      if (regex.test(name.toponym)) {
+        return true
+      }
+    }
+    return false
+  }
 
   return gazetteers
     .map(gazetteer => ({
@@ -33,7 +49,9 @@ module.exports = function({gazetteers, onFeaturePicked}) {
   const inputProps = {
     placeholder: 'Search for a place name',
     value,
-    onChange: (event, { newValue }) => setValue(newValue)
+    onChange: (event, { newValue }) => {
+      setValue(newValue)
+    }
   }
 
   return h(
@@ -49,7 +67,11 @@ module.exports = function({gazetteers, onFeaturePicked}) {
       onSuggestionSelected:
         (event, {suggestion}) => onFeaturePicked(suggestion),
       onSuggestionHighlighted:
-        ({suggestion}) => onFeaturePicked(suggestion),
+        ({suggestion}) => {
+          if (suggestion !== null) {
+            onFeaturePicked(suggestion)
+          }
+        },
       getSuggestionValue:
         suggestion => suggestion.properties.title,
       renderSuggestion:
