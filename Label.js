@@ -5,14 +5,14 @@ const h = require('react-hyperscript')
 const description = feature => feature.descriptions
   ? feature.descriptions
     .map(description => description.value)
-    .join(', ')
+    .join(' | ')
   : ''
 
 const names = (feature, title) => feature.names
   ? feature.names
     .filter(name => name.toponym !== title)
     .map(name => name.toponym)
-    .join(', ')
+    .join(' | ')
   : ''
 
 module.exports = function({feature}) {
