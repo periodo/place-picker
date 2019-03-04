@@ -1,0 +1,8 @@
+@import url("node_modules/@zendeskgarden/react-menus/dist/styles.css");
+@import url("node_modules/@zendeskgarden/react-textfields/dist/styles.css");
+@import url("node_modules/@zendeskgarden/react-tags/dist/styles.css");
+@import url("node_modules/@zendeskgarden/react-buttons/dist/styles.css");
+@import url("node_modules/@zendeskgarden/react-autocomplete/dist/styles.css");
+body {
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", Arial, sans-serif;
+}

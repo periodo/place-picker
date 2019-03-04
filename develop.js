@@ -31,6 +31,10 @@ const Label = connect(
   state => ({feature: state.feature})
 )(require('./Label'))
 
+const MultiSelect = connect(
+  () => ({})
+)(require('./MultiSelect'))
+
 const store = createStore(
   app,
   window.__REDUX_DEVTOOLS_EXTENSION__ && window.__REDUX_DEVTOOLS_EXTENSION__()
@@ -42,6 +46,7 @@ render(
       h(Map, {key: 1}),
       h(Label, {key: 2}),
       h(FeaturePicker, {key: 3, gazetteers}),
+      h(MultiSelect, {key: 4})
     ]
   ),
   document.body.appendChild(document.createElement('div'))
