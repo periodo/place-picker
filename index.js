@@ -8,7 +8,28 @@ const Autosuggest = require('react-autosuggest')
 // Regular_Expressions#Using_special_characters
 const escapeRegexCharacters = str => str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
 
+const matches = regex => (matched, feature) => {
+  if (! (feature && feature.properties)) {
+    return matched
+  }
+  if (regex.test(feature.properties.title)) {
+    matched.push({...feature, match: feature.properties.title})
+    return matched
+  }
+  if (! feature.names) {
+    return matched
+  }
+  for (let name of feature.names) {
+    if (regex.test(name.toponym)) {
+      matched.push({...feature, match: name.toponym})
+      return matched
+    }
+  }
+  return matched
+}
+
 const getSuggestions = (gazetteers, value) => {
+
   const escapedValue = escapeRegexCharacters(value.trim())
 
   if (escapedValue === '') {
@@ -16,31 +37,16 @@ const getSuggestions = (gazetteers, value) => {
   }
 
   const regex = new RegExp('^' + escapedValue, 'i')
-  const matches = feature => {
-    if (! (feature && feature.properties)) {
-      return false
-    }
-    if (regex.test(feature.properties.title)) {
-      return true
-    }
-    if (! feature.names) {
-      return false
-    }
-    for (let name of feature.names) {
-      if (regex.test(name.toponym)) {
-        return true
-      }
-    }
-    return false
-  }
 
   return gazetteers
     .map(gazetteer => ({
       title: gazetteer.title,
-      features: gazetteer.features.filter(matches)
+      features: gazetteer.features.reduce(matches(regex), [])
     }))
     .filter(gazetteer => gazetteer.features.length > 0)
 }
+
+const capitalize = s => s.replace(/(?:^|\s)\S/g, a => a.toUpperCase())
 
 module.exports = function({gazetteers, onFeaturePicked}) {
 
@@ -73,9 +79,12 @@ module.exports = function({gazetteers, onFeaturePicked}) {
           }
         },
       getSuggestionValue:
-        suggestion => suggestion.properties.title,
+        suggestion => suggestion.match,
       renderSuggestion:
-        suggestion => h('div', suggestion.properties.title),
+        (suggestion, {query}) => h('div', [
+          h('strong', {key: 1}, capitalize(query)),
+          suggestion.match.slice(query.length)
+        ]),
       renderSectionTitle:
         section => h('strong', section.title),
       getSectionSuggestions:
