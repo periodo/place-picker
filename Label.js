@@ -20,7 +20,7 @@ module.exports = function({feature}) {
     return h('section', [
       h('h1', {key: 1}, feature.properties.title),
       h('p', {key: 2}, names(feature, feature.properties.title)),
-      h('p', {key: 2}, description(feature))
+      h('p', {key: 3}, description(feature))
     ])
   } else {
     return null
