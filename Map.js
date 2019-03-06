@@ -22,7 +22,7 @@ mixtiles(map, {
 const drawTriangle = map.createDraw({
   frag: `
     void main () {
-      gl_FragColor = vec4(1.0,0.0,1.0,0.3);
+      gl_FragColor = vec4(1.0,0.0,1.0,0.5);
     }
   `,
   uniforms: {
@@ -40,6 +40,20 @@ const drawTriangle = map.createDraw({
 
 const easing = require('eases/circ-in-out')
 
+const length = bbox => {
+  let lonDelta = bbox[2] - bbox[0]
+  let latDelta = bbox[3] - bbox[1]
+  if (lonDelta > 359) {
+    return latDelta
+  }
+  return Math.max(lonDelta, latDelta)
+}
+
+const padding = bbox => Math.max(1,
+  // the coefficients here were determined through trial & error
+  Math.round((-0.68 * Math.log(length(bbox))) + 3.91)
+)
+
 const display = geometry => {
   const mesh = createMesh(geometry)
   drawTriangle.props = [mesh.triangle]
@@ -52,7 +66,7 @@ const display = geometry => {
     bbox[2] = Math.max(bbox[2], mesh.triangle.positions[i][0])
     bbox[3] = Math.max(bbox[3], mesh.triangle.positions[i][1])
   }
-  zoomTo(map, {viewbox: bbox, duration: 750, padding: 2, easing})
+  zoomTo(map, {viewbox: bbox, duration: 750, padding: padding(bbox), easing})
 }
 
 const React = require('react')

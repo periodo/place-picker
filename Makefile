@@ -20,8 +20,7 @@ tiles:
 ####
 
 develop: node_modules places.json tiles
-	$(NPM_BIN)/budo develop.js \
-	--css styles.css --live --open -- -g svg-reactify
+	$(NPM_BIN)/budo develop.js --css styles.css --live --open
 
 clean:
 	rm places.json

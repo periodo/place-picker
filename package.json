@@ -13,12 +13,11 @@
     "@zendeskgarden/react-theming": "^3.2.1",
     "browserify": "^16.2.3",
     "budo": "^11.6.1",
-    "eslint": "^5.14.1",
+    "eslint": "^5.15.1",
     "prop-types": "^15.7.2",
     "react": "^16.8.3",
     "react-dom": "^16.8.3",
-    "styled-components": "^3.5.0-0",
-    "svg-reactify": "file:../svg-reactify"
+    "styled-components": "^3.5.0-0"
   },
   "peerDependencies": {
     "@zendeskgarden/react-theming": "^3.2.1",
@@ -29,12 +28,12 @@
   },
   "dependencies": {
     "@zendeskgarden/react-autocomplete": "^0.8.3",
-    "@zendeskgarden/react-buttons": "^3.9.0",
+    "@zendeskgarden/react-buttons": "^3.9.1",
     "@zendeskgarden/react-menus": "^4.3.6",
     "@zendeskgarden/react-selection": "^4.6.2",
     "@zendeskgarden/react-tags": "^1.2.3",
     "@zendeskgarden/react-textfields": "^3.8.3",
-    "@zendeskgarden/svg-icons": "^5.3.0",
+    "@zendeskgarden/react-typography": "^0.3.0",
     "earth-mesh": "^2.1.0",
     "eases": "^1.0.8",
     "glsl": "0.0.1",
@@ -43,7 +42,6 @@
     "mixmap": "^1.5.1",
     "mixmap-tiles": "^1.1.2",
     "mixmap-zoom": "^1.0.0",
-    "react-autosuggest": "^9.4.3",
     "react-hyperscript": "^3.2.0",
     "react-redux": "^6.0.1",
     "redux": "^4.0.1",
