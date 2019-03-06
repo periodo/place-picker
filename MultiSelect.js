@@ -63,10 +63,10 @@ module.exports = function({
         setTagFocusedKey(newState.tagFocusedKey)
 
       } else if (key === 'isOpen') {
-        setOpen(newState.isOpen)
-        if (! newState.isOpen) {
+        if ((newState.isOpen !== isOpen) && (! newState.isOpen)) {
           setQuery('')
         }
+        setOpen(newState.isOpen)
       }
     })
   }
@@ -82,28 +82,29 @@ module.exports = function({
               focusedKey,
               onSelect,
               onStateChange,
-              trigger: suggestionTriggerCreator(
-                placeholder,
+              trigger: suggestionTriggerCreator({
+                getFieldInputProps,
                 inputValue,
-                setQuery,
-                selectedKeys,
-                renderSelectedKey,
-                onSelectionChange,
                 isFocused,
-                setFocused,
                 onFocusChange,
-                setWrapperRef,
-                getFieldInputProps
-              )
+                onSelectionChange,
+                placeholder,
+                renderSelectedKey,
+                selectedKeys,
+                setFocused,
+                setQuery,
+                setTagFocusedKey,
+                setWrapperRef
+              })
             },
             [
-              suggestionListCreator(
+              suggestionListCreator({
                 suggestions,
                 selectedKeys,
                 getSectionSuggestions,
                 renderSectionTitle,
                 wrapperRef
-              )
+              })
             ]
           ) // end AutocompleteContainer
         ]) // end TextGroup

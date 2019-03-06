@@ -26,21 +26,13 @@ const hidden = (selectedKeys, isFocused, isOpen, tagFocusedKey) => (
   (! focused(isFocused, isOpen, tagFocusedKey))
 )
 
-const deleteTag = (key, selectedKeys, onSelectionChange, onFocusChange) => {
-  const newSelectedKeys = new Set(selectedKeys)
-  newSelectedKeys.delete(key)
-  onSelectionChange(newSelectedKeys)
-  onFocusChange(undefined)
-}
-
 const renderTags = (
   isFocused,
   selectedKeys,
   renderSelectedKey,
-  onSelectionChange,
   tagFocusedKey,
-  onFocusChange,
-  getTagProps
+  getTagProps,
+  deleteTag,
 ) => {
   const keys = Array.from(selectedKeys)
 
@@ -49,11 +41,7 @@ const renderTags = (
     getTagProps({ key, focused: tagFocusedKey === key }),
     [
       renderSelectedKey(key),
-      h(Close, {
-        onClick: () => deleteTag(
-          key, selectedKeys, onSelectionChange, onFocusChange
-        )
-      })
+      h(Close, {onClick: () => deleteTag(key)})
     ]
   )
 
@@ -73,12 +61,7 @@ const renderTags = (
   return tags
 }
 
-const keyDownHandler = (
-  selectedKeys,
-  onSelectionChange,
-  tagFocusedKey,
-  onFocusChange
-) => e => {
+const keyDownHandler = (selectedKeys, tagFocusedKey, deleteTag) => e => {
   if (e.keyCode === KEY_CODES.DELETE || e.keyCode === KEY_CODES.BACKSPACE) {
     let keyToDelete = undefined
     if (tagFocusedKey !== undefined) {
@@ -89,81 +72,88 @@ const keyDownHandler = (
       keyToDelete = keys[keys.length - 1]
     }
     if (keyToDelete !== undefined) {
-      deleteTag(keyToDelete, selectedKeys, onSelectionChange, onFocusChange)
+      deleteTag(keyToDelete)
     }
   }
 }
 
-module.exports = (
-  placeholder,
+module.exports = ({
+  getFieldInputProps,
   inputValue,
-  setQuery,
-  selectedKeys,
-  renderSelectedKey,
-  onSelectionChange,
   isFocused,
-  setFocused,
   onFocusChange,
-  setWrapperRef,
-  getFieldInputProps
-) => ({
-  getTriggerProps,
+  onSelectionChange,
+  placeholder,
+  renderSelectedKey,
+  selectedKeys,
+  setFocused,
+  setQuery,
+  setTagFocusedKey,
+  setWrapperRef
+}) => ({
   getInputProps,
   getTagProps,
-  triggerRef,
+  getTriggerProps,
   inputRef,
   isOpen,
-  tagFocusedKey
-}) => (
-  h(FauxInput,
-    getTriggerProps({
-      open: isOpen,
-      small: true,
-      select: true,
-      tagLayout: true,
-      focused: focused(isFocused, isOpen, tagFocusedKey),
-      inputRef: ref => {
-        setWrapperRef(ref)
-        triggerRef(ref)
-      }
-    }),
-    [
-      renderTags(
-        focused(isFocused, isOpen, tagFocusedKey),
-        selectedKeys,
-        renderSelectedKey,
-        onSelectionChange,
-        tagFocusedKey,
-        onFocusChange,
-        getTagProps
-      ),
-      h(
-        Input,
-        getInputProps(
-          getFieldInputProps({
-            bare: true,
-            innerRef: inputRef,
-            value: inputValue,
-            onChange: e => setQuery(e.target.value),
-            onKeyDown: keyDownHandler(
-              selectedKeys,
-              onSelectionChange,
-              tagFocusedKey,
-              onFocusChange
-            ),
-            placeholder: (selectedKeys.size > 0) ? undefined : placeholder,
-            onFocus: () => setFocused(true),
-            onBlur: () => setFocused(false),
-            style: Object.assign(
-              { margin: '0 2px', flexGrow: 1, width: 60 },
-              hidden(selectedKeys, isFocused, isOpen, tagFocusedKey)
-                ? { opacity: 0, height: 0, minHeight: 0 }
-                : {}
-            )
-          },
-          { isDescribed: false })
+  tagFocusedKey,
+  triggerRef
+}) => {
+
+  const deleteTag = key => {
+    const newSelectedKeys = new Set(selectedKeys)
+    newSelectedKeys.delete(key)
+    onSelectionChange(newSelectedKeys)
+    onFocusChange(undefined)
+    if (key === tagFocusedKey) {
+      setTagFocusedKey(undefined)
+    }
+  }
+
+  return (
+    h(FauxInput,
+      getTriggerProps({
+        open: isOpen,
+        small: true,
+        select: true,
+        tagLayout: true,
+        focused: focused(isFocused, isOpen, tagFocusedKey),
+        inputRef: ref => {
+          setWrapperRef(ref)
+          triggerRef(ref)
+        }
+      }),
+      [
+        renderTags(
+          focused(isFocused, isOpen, tagFocusedKey),
+          selectedKeys,
+          renderSelectedKey,
+          tagFocusedKey,
+          getTagProps
+        ),
+        h(
+          Input,
+          getInputProps(
+            getFieldInputProps({
+              bare: true,
+              innerRef: inputRef,
+              value: inputValue,
+              onChange: e => setQuery(e.target.value),
+              onKeyDown: keyDownHandler(selectedKeys, tagFocusedKey, deleteTag),
+              placeholder: (selectedKeys.size > 0) ? undefined : placeholder,
+              onFocus: () => setFocused(true),
+              onBlur: () => setFocused(false),
+              style: Object.assign(
+                { margin: '0 2px', flexGrow: 1, width: 60 },
+                hidden(selectedKeys, isFocused, isOpen, tagFocusedKey)
+                  ? { opacity: 0, height: 0, minHeight: 0 }
+                  : {}
+              )
+            },
+            { isDescribed: false })
+          )
         )
-      )
-    ]
+      ]
+    )
   )
-)
+}

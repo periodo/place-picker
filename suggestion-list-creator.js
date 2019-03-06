@@ -46,13 +46,13 @@ const render = (
     : menuItems
 }
 
-module.exports = (
+module.exports = ({
   suggestions,
   selectedKeys,
   getSectionSuggestions,
   renderSectionTitle,
   wrapperRef
-) => (
+}) => (
   {getMenuProps, getItemProps, placement, focusedKey}) => {
   return h(MenuView,
     getMenuProps({
