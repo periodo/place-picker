@@ -77,20 +77,22 @@ const display = (features, focusedFeature) => {
     f => (f.id !== focusedFeatureId) && f.geometry
   )
   let viewbox = undefined
+  if (unfocusedFeatures.length > 0) {
+    const mesh = createMesh({features: unfocusedFeatures})
+    drawFeatures.props = [mesh.triangle]
+    viewbox = bbox(mesh)
+  } else {
+    drawFeatures.props = []
+  }
   if (focusedFeature && focusedFeature.geometry) {
     const mesh = createMesh(focusedFeature)
     drawFocusedFeature.props = [mesh.triangle]
     viewbox = bbox(mesh)
+  } else {
+    drawFocusedFeature.props = []
   }
-  if (unfocusedFeatures.length > 0) {
-    const mesh = createMesh({features: unfocusedFeatures})
-    drawFeatures.props = [mesh.triangle]
-    if (viewbox === undefined) {
-      viewbox = bbox(mesh)
-    }
-  }
+  map.draw()
   if (viewbox) {
-    map.draw()
     zoomTo(map, {viewbox, duration: 750, padding: padding(viewbox), easing})
   }
 }
