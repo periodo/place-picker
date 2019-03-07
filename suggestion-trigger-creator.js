@@ -26,14 +26,14 @@ const hidden = (selectedKeys, isFocused, isOpen, tagFocusedKey) => (
   (! focused(isFocused, isOpen, tagFocusedKey))
 )
 
-const renderTags = (
-  isFocused,
-  selectedKeys,
-  renderSelectedKey,
-  tagFocusedKey,
-  getTagProps,
+const renderTags = ({
   deleteTag,
-) => {
+  getTagProps,
+  isFocused,
+  renderSelectedKey,
+  selectedKeys,
+  tagFocusedKey,
+}) => {
   const keys = Array.from(selectedKeys)
 
   const keyToTag = key => h(
@@ -124,13 +124,14 @@ module.exports = ({
         }
       }),
       [
-        renderTags(
-          focused(isFocused, isOpen, tagFocusedKey),
-          selectedKeys,
+        renderTags({
+          deleteTag,
+          getTagProps,
+          isFocused: focused(isFocused, isOpen, tagFocusedKey),
           renderSelectedKey,
+          selectedKeys,
           tagFocusedKey,
-          getTagProps
-        ),
+        }),
         h(
           Input,
           getInputProps(

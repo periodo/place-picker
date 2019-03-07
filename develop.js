@@ -127,7 +127,10 @@ const MultiSelect = connect(
 )(require('./MultiSelect'))
 
 const Map = connect(
-  ({focusedFeature}) => ({features: [focusedFeature]}),
+  ({selectedFeatures, focusedFeature}) => ({
+    features: Object.values(selectedFeatures),
+    focusedFeature
+  }),
 )(require('./Map'))
 
 const FeatureLabel = connect(

@@ -18,11 +18,14 @@ mixtiles(map, {
   load: require('mixmap-tiles/xhr')
 })
 
+const PURPLE = 'vec4(1.0,0.0,1.0,0.5)'
+const YELLOW = 'vec4(1.0,1.0,0.0,0.5)'
+
 // regl config for drawing triangles
-const drawTriangle = map.createDraw({
+const drawTriangle = color => map.createDraw({
   frag: `
     void main () {
-      gl_FragColor = vec4(1.0,0.0,1.0,0.5);
+      gl_FragColor = ${color};
     }
   `,
   uniforms: {
@@ -37,6 +40,9 @@ const drawTriangle = map.createDraw({
   },
   elements: map.prop('cells')
 })
+
+const drawFeatures = drawTriangle(YELLOW)
+const drawFocusedFeature = drawTriangle(PURPLE)
 
 const easing = require('eases/circ-in-out')
 
@@ -54,19 +60,39 @@ const padding = bbox => Math.max(1,
   Math.round((-0.68 * Math.log(length(bbox))) + 3.91)
 )
 
-const display = geometry => {
-  const mesh = createMesh(geometry)
-  drawTriangle.props = [mesh.triangle]
-  map.draw()
-
-  const bbox = [180,90,-180,-90]
-  for (var i = 0; i < mesh.triangle.positions.length; i++) {
-    bbox[0] = Math.min(bbox[0], mesh.triangle.positions[i][0])
-    bbox[1] = Math.min(bbox[1], mesh.triangle.positions[i][1])
-    bbox[2] = Math.max(bbox[2], mesh.triangle.positions[i][0])
-    bbox[3] = Math.max(bbox[3], mesh.triangle.positions[i][1])
+const bbox = mesh => {
+  const box = [180,90,-180,-90]
+  for (let i = 0; i < mesh.triangle.positions.length; i++) {
+    box[0] = Math.min(box[0], mesh.triangle.positions[i][0])
+    box[1] = Math.min(box[1], mesh.triangle.positions[i][1])
+    box[2] = Math.max(box[2], mesh.triangle.positions[i][0])
+    box[3] = Math.max(box[3], mesh.triangle.positions[i][1])
   }
-  zoomTo(map, {viewbox: bbox, duration: 750, padding: padding(bbox), easing})
+  return box
+}
+
+const display = (features, focusedFeature) => {
+  const focusedFeatureId = focusedFeature ? focusedFeature.id : undefined
+  const unfocusedFeatures = features.filter(
+    f => (f.id !== focusedFeatureId) && f.geometry
+  )
+  let viewbox = undefined
+  if (focusedFeature && focusedFeature.geometry) {
+    const mesh = createMesh(focusedFeature)
+    drawFocusedFeature.props = [mesh.triangle]
+    viewbox = bbox(mesh)
+  }
+  if (unfocusedFeatures.length > 0) {
+    const mesh = createMesh({features: unfocusedFeatures})
+    drawFeatures.props = [mesh.triangle]
+    if (viewbox === undefined) {
+      viewbox = bbox(mesh)
+    }
+  }
+  if (viewbox) {
+    map.draw()
+    zoomTo(map, {viewbox, duration: 750, padding: padding(viewbox), easing})
+  }
 }
 
 const React = require('react')
@@ -80,23 +106,26 @@ const Mix = function() {
   return h('div', {ref})
 }
 
-const Map = function(props) {
+const Map = function({
+  width,
+  height,
+  features = [],
+  focusedFeature
+}) {
   let ref = React.createRef()
   React.useEffect(() => {
-    for (let feature of (props.features || [])) {
-      if (feature && feature.geometry) display(feature)
-    }
     while (ref.current.firstChild) {
       ref.current.removeChild(ref.current.firstChild)
     }
-    ref.current.appendChild(map.render(props))
+    display(features, focusedFeature)
+    ref.current.appendChild(map.render({width, height}))
   })
   return h('div', {ref})
 }
 
-module.exports = function({features}) {
+module.exports = function({features, focusedFeature}) {
   return [
     h(Mix, {key: 1}),
-    h(Map, {key: 2, width: 400, height: 200, features})
+    h(Map, {key: 2, width: 400, height: 200, features, focusedFeature})
   ]
 }
