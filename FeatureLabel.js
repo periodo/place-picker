@@ -13,14 +13,20 @@ const Box = styled(TextGroup)`
   background-color: #e9ebed;
 `
 
-const Title = styled(XL)`
-  padding: 5px 10px;
-`
-
-const Names = styled(SM)`
+const Subtle = styled(SM)`
   color: #777777;
   padding: 0 10px 5px;
 `
+
+const Title = ({title}) => h(XL, {tag: 'span'}, title)
+
+const Header = ({feature}) => {
+  const children = [h(Title, {title: feature.properties.title})]
+  if (feature.geometry === undefined) {
+    children.push(h(Subtle, {tag: 'span'}, [h('i', 'not shown on map')]))
+  }
+  return h('div', {style: {padding: '5px 10px'}}, children)
+}
 
 const Description = styled(MD)`
   padding: 0 10px 5px;
@@ -46,8 +52,8 @@ module.exports = function({feature}) {
     feature && feature.properties && feature.properties.title
       ?
       [
-        h(Title, feature.properties.title),
-        h(Names, names(feature, feature.properties.title)),
+        h(Header, {feature}),
+        h(Subtle, names(feature, feature.properties.title)),
         h(Description, description(feature, feature.properties.title)),
       ]
       : []
