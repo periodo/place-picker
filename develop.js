@@ -22,21 +22,37 @@ const suggestionsRequested = query => ({type: 'SUGGESTIONS_REQUESTED', query})
 
 const capitalize = s => s.replace(/(?:^|\s)\S/g, a => a.toUpperCase())
 
-const renderSuggestion = (suggestion, query) => h('span', [
-  h('strong', capitalize(query)),
-  suggestion.slice(query.length)
-])
+const renderSuggestion = (suggestion, match) => {
+  const begin = match.search(suggestion)
+  if (begin < 0) {
+    return h('span', suggestion)
+  } else {
+    return h('span', [
+      suggestion.slice(0, begin),
+      h('strong', capitalize(match.query)),
+      suggestion.slice(begin + match.query.length)
+    ])
+  }
+}
 
 const escapeRegexCharacters = str => str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
 
 const matcher = query => {
-  const escapedQuery = escapeRegexCharacters(query.trim())
+  const trimmedQuery = query.trim()
+  const escapedQuery = escapeRegexCharacters(trimmedQuery)
   if (escapedQuery === '') {
-    // match everything on empty query
-    return (() => true)
+    return {
+      // match everything on empty query
+      test: () => true,
+      search: () => -1
+    }
   }
-  const regex = new RegExp('^' + escapedQuery, 'i')
-  return (s => regex.test(s))
+  const regex = new RegExp('\\b' + escapedQuery, 'i')
+  return {
+    test: s => regex.test(s),
+    search: s => s.search(regex),
+    query: trimmedQuery
+  }
 }
 
 const matches = query => {
@@ -44,21 +60,21 @@ const matches = query => {
 
   return (matched, feature) => {
     const add = (key, label) => {
-      matched.push([key, renderSuggestion(label, query), label])
+      matched.push([key, renderSuggestion(label, match), label])
       return matched
     }
 
     if (! (feature && feature.properties)) {
       return matched
     }
-    if (match(feature.properties.title)) {
+    if (match.test(feature.properties.title)) {
       return add(feature.id, feature.properties.title)
     }
     if (! feature.names) {
       return matched
     }
     for (let name of feature.names) {
-      if (match(name.toponym)) {
+      if (match.test(name.toponym)) {
         return add(feature.id, name.toponym)
       }
     }
@@ -79,8 +95,6 @@ const keysToFeatures = keys => {
   keys.forEach(key => { o[key] = features[key] })
   return o
 }
-
-//const BNA = 'http://www.wikidata.org/entity/Q1492'
 
 const initialState = {
   suggestions: getSuggestions(),
